@@ -4,7 +4,7 @@ import kotlinx.coroutines.*
 import retrofit2.*
 import kotlin.coroutines.*
 
-suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine { cont ->
+suspend fun <T> Call<T>.await(): T = suspendCoroutine { cont ->
     enqueue(object : Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
             if (response.isSuccessful) {
@@ -18,9 +18,6 @@ suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine { cont ->
             cont.resumeWithException(t)
         }
     })
-    cont.invokeOnCancellation {
-        cancel()
-    }
 }
 
 class ErrorResponse(response: Response<*>) : Exception(
