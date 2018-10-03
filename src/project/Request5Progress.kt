@@ -12,7 +12,7 @@ suspend fun loadContributorsProgress(req: RequestData, callback: (List<User>) ->
         val users = service.listRepoContributors(req.org, repo.name).await()
         log.info("${repo.name}: loaded ${users.size} contributors")
 
-        contribs = (contribs + users).aggregate()
+        contribs = (contribs + users).aggregateSlow()
         callback(contribs)
     }
 
