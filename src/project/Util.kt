@@ -5,7 +5,7 @@ import org.slf4j.*
 
 val log: Logger = LoggerFactory.getLogger("Contributors")
 
-// todo: write actual aggregation code here
-fun List<User>.aggregate(): List<User> =
-    this
-
+fun List<User>.aggregate(): List<User> = this
+        .groupBy { it.login }
+        .map { User(it.key, it.value.sumBy { it.contributions }) }
+        .sortedByDescending { it.contributions }
