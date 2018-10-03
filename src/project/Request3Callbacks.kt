@@ -10,19 +10,20 @@ fun loadContributorsCallbacks(req: RequestData, callback: (List<User>) -> Unit) 
 
     service.listOrgRepos(req.org).responseCallback { repos ->
         log.info("${req.org}: loaded ${repos.size} repos")
-        val all = mutableListOf<User>()
+        val contribs = mutableListOf<User>()
 
         fun requestRepo(i: Int) {
             if (i < repos.size) {
                 val repo = repos[i]
                 service.listRepoContributors(req.org, repo.name).responseCallback { users ->
                     log.info("${repo.name}: loaded ${users.size} contributors")
-                    all.addAll(users)
+                    contribs.addAll(users)
 
                     requestRepo(i + 1)
                 }
             } else {
-                callback(all.aggregate())
+                log.info("Total: ${contribs.size} contributors")
+                callback(contribs.aggregate())
             }
         }
 
