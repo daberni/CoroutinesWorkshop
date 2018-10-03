@@ -1,9 +1,33 @@
 package project
 
-import retrofit2.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-fun loadContributorsCallbacks(req: RequestData, callback: (List<User>) -> Unit)  {
-    TODO()
+fun loadContributorsCallbacks(req: RequestData, callback: (List<User>) -> Unit) {
+    val service = createGitHubService(req.username, req.password)
+    log.info("Loading ${req.org} repos")
+
+    service.listOrgRepos(req.org).responseCallback { repos ->
+        log.info("${req.org}: loaded ${repos.size} repos")
+        val all = mutableListOf<User>()
+
+        fun requestRepo(i: Int) {
+            if (i < repos.size) {
+                val repo = repos[i]
+                service.listRepoContributors(req.org, repo.name).responseCallback { users ->
+                    log.info("${repo.name}: loaded ${users.size} contributors")
+                    all.addAll(users)
+
+                    requestRepo(i + 1)
+                }
+            } else {
+                callback(all.aggregate())
+            }
+        }
+
+        requestRepo(0)
+    }
 }
 
 inline fun <T> Call<T>.responseCallback(crossinline callback: (T) -> Unit) {
